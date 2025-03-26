@@ -6,6 +6,7 @@ const morgan = require('morgan');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const {MessagingResponse} = require('twilio').twiml;
+const fetch = require('node-fetch');
 
 //import routes
 //const weatherRoutes = requir('./routes/weatherRoutes');
@@ -21,6 +22,18 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static("public"));
 //app.use("/api/v1/weather", weatherRoutes);
 
+//HELPER FUNCTIONS
+function containsFiveNumbers(string){
+    return /\d{5}/.test(string);
+};
+
+async function getCoordinateFromZip(zip){
+    const url = `http://api.openweathermap.org/geo/1.0/zip?zip=${zip}&appid=${process.env.OPEN_WEATHER_API_KEY}`;
+    const response = await fetch(url);
+    const data = await response.json();
+    return data;
+}
+
 //Testing Browser GET
 app.get("/", (req,res) => {
     res.send("Hello World");
@@ -28,11 +41,13 @@ app.get("/", (req,res) => {
 
 //Twilio Handling
 app.post("/sms", (req,res) => {
-    console.log(req.body);
     const twiml = new MessagingResponse();
-    if (req.body.Body == 'test'){
-        twiml.message('test success');
-    } else if (req.body.Body == 'hello') {
+    var userSMS = req.body.Body;
+    if (containsFiveNumbers(userSMS)){
+        getCoordinateFromZip(userSMS).then((data) => {
+            twiml.message(`The coordinates for ${userSMS} are ${data.lat} and ${data.lon}`);
+        });
+    } else if (userSMS == 'hello') {
         twiml.message('hi!');
     } else {
         twiml.message(
