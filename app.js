@@ -34,6 +34,13 @@ async function getCoordinateFromZip(zip){
     return data;
 }
 
+async function getWeatherFromCoordinates(lat, lon){
+    const url = `https://api.openweathermap.org/data/3.0/onecall?lat=${lat}&lon=${lon}&units=imperial&appid=${process.env.OPEN_WEATHER_API_KEY}`;
+    const response = await fetch(url);
+    const data = await response.json();
+    return data;
+}
+
 //Testing Browser GET
 app.get("/", (req,res) => {
     res.send("Hello World");
@@ -46,9 +53,11 @@ app.post("/sms", (req,res) => {
     var userSMS = "20012";
     if (containsFiveNumbers(userSMS)){
         getCoordinateFromZip(userSMS).then((data) => {
-            twiml.message(`The coordinates for ${userSMS} are ${data.lat} and ${data.lon}`);
-            res.type('text/xml').send(twiml.toString());
+            getWeatherFromCoordinates(data.lat, data.lon).then((weatherData) => {
+                twiml.message(`The weather in ${userSMS} is ${weatherData.current.weather[0].description} with a temperature of ${weatherData.current.temp} degrees.`);
+                res.type('text/xml').send(twiml.toString());
             });
+        });
     } else if (userSMS == 'hello') {
         twiml.message('hi!');
     } else {
