@@ -49,8 +49,7 @@ app.get("/", (req,res) => {
 //Twilio Handling
 app.post("/sms", (req,res) => {
     const twiml = new MessagingResponse();
-    //var userSMS = req.body.Body;
-    var userSMS = "20012";
+    var userSMS = req.body.Body;
     if (containsFiveNumbers(userSMS)){
         getCoordinateFromZip(userSMS).then((data) => {
             getWeatherFromCoordinates(data.lat, data.lon).then((weatherData) => {
