@@ -42,19 +42,21 @@ app.get("/", (req,res) => {
 //Twilio Handling
 app.post("/sms", (req,res) => {
     const twiml = new MessagingResponse();
-    var userSMS = req.body.Body;
+    //var userSMS = req.body.Body;
+    var userSMS = "20012";
     if (containsFiveNumbers(userSMS)){
         getCoordinateFromZip(userSMS).then((data) => {
             twiml.message(`The coordinates for ${userSMS} are ${data.lat} and ${data.lon}`);
-        });
+            res.type('text/xml').send(twiml.toString());
+            });
     } else if (userSMS == 'hello') {
         twiml.message('hi!');
     } else {
         twiml.message(
             'Not what we were expecting. Try that again please'
         );
+        res.type('text/xml').send(twiml.toString());
     }
-    res.type('text/xml').send(twiml.toString());
 });
 
 //error handling
