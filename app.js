@@ -50,10 +50,11 @@ app.get("/", (req,res) => {
 app.post("/sms", (req,res) => {
     const twiml = new MessagingResponse();
     var userSMS = req.body.Body;
+    //var userSMS = "20012";
     if (containsFiveNumbers(userSMS)){
         getCoordinateFromZip(userSMS).then((geoData) => {
             getWeatherFromCoordinates(geoData.lat, geoData.lon).then((weatherData) => {
-                twiml.message(`The weather in ${geoData.name} is currently ${weatherData.current.weather[0].description} with a temperature of ${weatherData.current.temp}ºF.`);
+                twiml.message(`The weather in ${geoData.name} is currently ${weatherData.current.weather[0].description} with a temperature of ${Math.round(weatherData.current.temp)}ºF.`);
                 res.type('text/xml').send(twiml.toString());
             });
         });
