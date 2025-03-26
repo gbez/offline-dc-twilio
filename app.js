@@ -1,6 +1,5 @@
 //import modules
 const express = require('express');
-const {createOneWeather, getAllWeather} = require('./database.js');
 const dotenv = require('dotenv');
 dotenv.config({ path: './config.env' });
 const morgan = require('morgan');
@@ -14,7 +13,7 @@ const {MessagingResponse} = require('twilio').twiml;
 //connect middleware
 const app = express();
 app.use(cors());
-app.use(express.json);
+app.use(express.json());
 app.use(morgan("combined"));
 app.use(bodyParser.urlencoded({ extended: false }));
 
@@ -22,8 +21,14 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static("public"));
 //app.use("/api/v1/weather", weatherRoutes);
 
+//Testing Browser GET
+app.get("/", (req,res) => {
+    res.send("Hello World");
+});
+
 //Twilio Handling
-app.post("/", (req,res) => {
+app.post("/sms", (req,res) => {
+    console.log(req.body);
     const twiml = new MessagingResponse();
     if (req.body.Body == 'test'){
         twiml.message('test success');
@@ -35,12 +40,12 @@ app.post("/", (req,res) => {
         );
     }
     res.type('text/xml').send(twiml.toString());
-})
+});
 
 //error handling
 app.use((err, req, res, next) => {
     console.error(err.stack);
     res.status(500).send("Something broke!")
-})
+});
 
 module.exports = app;
